@@ -4,10 +4,19 @@ import os
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)
     
     # Load configuration
     app.config.from_object('config.Config')
+    
+    # CORS configuration - allow frontend domain
+    frontend_url = app.config.get('FRONTEND_URL', 'http://localhost:3000')
+    CORS(app, resources={
+        r"/api/*": {
+            "origins": [frontend_url, "http://localhost:3000", "http://localhost:3001"],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"]
+        }
+    })
     
     # Folder configuration
     app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), '..', 'uploads')
