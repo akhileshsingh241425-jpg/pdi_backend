@@ -6,6 +6,18 @@ For PRODUCTION deployment, use production_server.py instead
 """
 from app import create_app
 import os
+import socket
+
+def find_free_port(start_port=5000, max_port=5100):
+    """Find a free port to run the server"""
+    for port in range(start_port, max_port):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(('', port))
+                return port
+        except OSError:
+            continue
+    return None
 
 app = create_app()
 
@@ -17,5 +29,14 @@ if __name__ == '__main__':
     print("📝 For PRODUCTION, use: python production_server.py")
     print("=" * 60)
     
-    port = int(os.environ.get('PORT', 5000))
+    # Try to find a free port
+    port = int(os.environ.get('PORT', 0))
+    if port == 0:
+        port = find_free_port()
+        if port is None:
+            print("❌ No free port available between 5000-5100")
+            exit(1)
+        print(f"✅ Using available port: {port}")
+    
+    print("=" * 60)
     app.run(host='0.0.0.0', port=port, debug=True, use_reloader=True, reloader_type='stat')
