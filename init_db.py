@@ -4,25 +4,36 @@ Run this to create the MySQL database
 """
 import pymysql
 import sys
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 def create_database():
     try:
+        # Get database credentials from environment variables
+        db_user = os.getenv('MYSQL_USER', 'root')
+        db_password = os.getenv('MYSQL_PASSWORD', 'root')
+        db_host = os.getenv('MYSQL_HOST', 'localhost')
+        db_name = os.getenv('MYSQL_DB', 'pdi_database')
+        
         # Connect to MySQL server (without specifying database)
         connection = pymysql.connect(
-            host='localhost',
-            user='root',
-            password='root',
+            host=db_host,
+            user=db_user,
+            password=db_password,
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor
         )
         
         with connection.cursor() as cursor:
             # Create database if it doesn't exist
-            cursor.execute("CREATE DATABASE IF NOT EXISTS pdi_database CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
-            print("✓ Database 'pdi_database' created successfully!")
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_name} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+            print(f"✓ Database '{db_name}' created successfully!")
             
             # Use the database
-            cursor.execute("USE pdi_database")
+            cursor.execute(f"USE {db_name}")
             
             # Show tables
             cursor.execute("SHOW TABLES")
